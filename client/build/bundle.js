@@ -74,6 +74,51 @@ const Request = function(url) {
   this.url = url;
 }
 
+Request.prototype.get = function(callback) {
+    const request = new XMLHttpRequest();
+    request.open('GET', this.url);
+
+    request.addEventListener('load', function() {
+        if(this.status !== 200) {
+            return;
+        }
+
+        const responseBody = JSON.parse(this.responseText);
+
+        callback(responseBody);
+    });
+    request.send();
+}
+
+Request.prototype.post = function(callback, body) {
+    const request = new XMLHttpRequest();
+    request.open('POST', this.url);
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.addEventListener('load', function() {
+        if(this.status !== 201) {
+            return;
+        }
+
+        const responseBody = JSON.parse(this.responseText);
+
+        callback(responseBody);
+    });
+    request.send(JSON.stringify(body));
+}
+
+Request.prototype.deleteAll = function (callback) {
+    const request = new XMLHttpRequest();
+    request.open('DELETE', this.url);
+    request.addEventListener('load', function () {
+        if(this.status !== 204){
+            return;
+        }
+
+        callback();
+    })
+    request.send();
+}
+
 module.exports = Request;
 
 
@@ -118,9 +163,47 @@ const Request = __webpack_require__(0);
 const quoteView = new QuoteView();
 const request = new Request('http://localhost:3000/api/quotes');
 
-const appStart = function(){
 
+const createButtonClicked = function (event) {
+    event.preventDefault();
+    console.log('form submit clicked');
+
+    const nameInputValue = document.querySelector('#name').value;
+    const quoteInputValue = document.querySelector('#quote').value;
+
+    const quoteToSend = {
+        name: nameInputValue,
+        quote: quoteInputValue
+    };
+
+    request.post(createRequestComplete, quoteToSend);
+};
+
+const createRequestComplete = function (newQuote) {
+    console.log(newQuote);
+    quoteView.addQuote(newQuote);
 }
+
+const appStart = function () {
+    request.get(getQuotesRequestComplete);
+    const createQuoteButton = document.querySelector('#submit-quote');
+    createQuoteButton.addEventListener('click', createButtonClicked);
+    const deleteAllButton = document.querySelector('#deleteButton');
+    deleteAllButton.addEventListener('click', deleteAllButtonClicked);
+};
+
+const deleteAllButtonClicked = function () {
+    console.log('Delete all button clicked');
+    request.deleteAll(deleteAllRequestComplete);
+};
+
+const deleteAllRequestComplete =function ()  {
+    quoteView.clear();
+}
+
+const getQuotesRequestComplete = function (allQuotes) {
+    console.log(allQuotes);
+};
 
 document.addEventListener('DOMContentLoaded', appStart);
 

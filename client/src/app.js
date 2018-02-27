@@ -29,7 +29,18 @@ const appStart = function () {
     request.get(getQuotesRequestComplete);
     const createQuoteButton = document.querySelector('#submit-quote');
     createQuoteButton.addEventListener('click', createButtonClicked);
+    const deleteAllButton = document.querySelector('#deleteButton');
+    deleteAllButton.addEventListener('click', deleteAllButtonClicked);
 };
+
+const deleteAllButtonClicked = function () {
+    console.log('Delete all button clicked');
+    request.deleteAll(deleteAllRequestComplete);
+};
+
+const deleteAllRequestComplete =function ()  {
+    quoteView.clear();
+}
 
 const getQuotesRequestComplete = function (allQuotes) {
     console.log(allQuotes);
