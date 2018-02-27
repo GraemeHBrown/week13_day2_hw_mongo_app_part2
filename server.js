@@ -56,6 +56,7 @@ MongoClient.connect('mongodb://localhost:27017', function (err, client) {
                 res.send();
             }
             res.status(204);
+            res.send();
 
         })
     });
